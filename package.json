@@ -23,7 +23,6 @@
     "express": "^4.16.4",
     "helmet": "^3.18.0",
     "morgan": "^1.9.1",
-    "react-stripe-elements": "^3.0.0",
     "stripe": "^6.31.2"
   }
 }
