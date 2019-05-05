@@ -1,0 +1,27 @@
+{
+  "name": "ocunited2-api",
+  "version": "1.0.0",
+  "description": "API for OC United.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guilleeh/ocunited2-api.git"
+  },
+  "author": "Guillermo Hernandez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/guilleeh/ocunited2-api/issues"
+  },
+  "homepage": "https://github.com/guilleeh/ocunited2-api#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "helmet": "^3.18.0",
+    "morgan": "^1.9.1"
+  }
+}
