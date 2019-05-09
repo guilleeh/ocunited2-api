@@ -1,4 +1,4 @@
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 9000;
 const express = require("express");
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -24,6 +24,26 @@ app.get("/", function(req, res) {
 });
 
 
+
+//retrieve payload from the POST request
+app.use(require("body-parser").text());
+
+//POST request handler for the charge
+app.post("/charge", async (req, res) => {
+  try {
+    let {status} = await stripe.charges.create({
+      amount: 2000,
+      currency: "usd",
+      description: "An example charge",
+      source: req.body
+    });
+
+    res.json({status});
+  } catch (err) {
+    res.status(500).end();
+  }
+});
+
 app.listen(PORT, () => {
-  console.log('listening on port 3000');
+  console.log('listening on port 9000');
 });
