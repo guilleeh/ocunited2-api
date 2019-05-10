@@ -32,7 +32,7 @@ app.use(require("body-parser").text());
 app.post("/charge", async (req, res) => {
   try {
     let {status} = await stripe.charges.create({
-      amount: 2000,
+      amount: 5000,
       currency: "usd",
       description: "An example charge",
       source: req.body
