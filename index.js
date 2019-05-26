@@ -7,7 +7,7 @@ const morgan = require('morgan');
 const stripe = require("stripe")("sk_test_JTcthxlTgnrPaqHIOkOJeWxX00tNmpflcm");
 const admin = require("firebase-admin");
 
-const app = express();
+const app=express().use('*', cors());
 
 app.use(express.json());
 // adding Helmet to enhance your API's security
@@ -20,6 +20,7 @@ app.use(cors());
 app.use(morgan('combined'));
 //retrieve payload from the POST request
 app.use(require("body-parser").text());
+app.use(express.json())
 
 let serviceAccount = require("./serviceAccountKey/serviceAccountKey.json");
 
@@ -28,15 +29,29 @@ admin.initializeApp({
   databaseURL: "https://ocunited-db637.firebaseio.com"
 });
 
-const db = admin.database();
+let db = admin.database();
 // creating a starting path in our database
-const ref = db.ref('/');
-const usersRef = ref.child('donations');
-usersRef.push({
-  firstDonation: "30",
-  secondDonation: "50",
-});
+let ref = db.ref('/');
+let donationsRef = ref.child('donations');
 
+
+
+function sendInfoToFirebase(info, donations, annonymous) {
+    console.log("sending to firebase")
+    console.log(donationsRef)
+    if(annonymous){
+      donationsRef.push({
+        Name: "Annonymous",
+        donation: donations.amountTotal
+      })
+    } else {
+      donationsRef.push({
+        Name: info.first_name + ' ' + info.last_name,
+        email: info.email,
+        donation: donations.amountTotal
+      });
+    }
+}
 
 
 app.get("/", function(req, res) {
@@ -48,14 +63,17 @@ app.get("/", function(req, res) {
 app.post("/charge", async (req, res) => {
   try {
     let {status} = await stripe.charges.create({
-      amount: 5000,
+      amount: req.body.donations.amountTotal * 100,
       currency: "usd",
-      description: "An example charge",
-      source: req.body
+      description: req.body.id.token.id,
+      source: req.body.id.token.id
     });
+
+    sendInfoToFirebase(req.body.data, req.body.donations, req.body.anon)
 
     res.json({status});
   } catch (err) {
+    console.log(err)
     res.status(500).end();
   }
 });
