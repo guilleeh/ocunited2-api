@@ -34,20 +34,30 @@ let db = admin.database();
 let ref = db.ref('/');
 let donationsRef = ref.child('donations');
 
+const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 
 
 function sendInfoToFirebase(info, donations, annonymous) {
-    console.log("sending to firebase")
-    console.log(donationsRef)
+    const d = new Date();
+    currentMonth = monthNames[d.getMonth()];
     if(annonymous){
-      donationsRef.push({
+      donationsRef.child(currentMonth).push({
         Name: "Annonymous",
         donation: donations.amountTotal
       })
     } else {
-      donationsRef.push({
-        Name: info.first_name + ' ' + info.last_name,
+      donationsRef.child(currentMonth).push({
+        name: info.first_name + ' ' + info.last_name,
         email: info.email,
+        phone: info.phone,
+        street: info.street,
+        city: info.city,
+        state: info.state,
+        postal: info.postal,
+        country: info.country,
         donation: donations.amountTotal
       });
     }
