@@ -22,6 +22,10 @@ app.use(morgan('combined'));
 app.use(require("body-parser").text());
 app.use(express.json())
 
+
+/*
+CODE FOR FIREBASE STARTS HERE
+*/
 let serviceAccount = require("./serviceAccountKey/serviceAccountKey.json");
 
 admin.initializeApp({
@@ -33,6 +37,9 @@ let db = admin.database();
 // creating a starting path in our database
 let ref = db.ref('/');
 let donationsRef = ref.child('Donations');
+/*
+CODE FOR FIREBASE ENDS HERE
+*/
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -69,7 +76,7 @@ function getAllDonations(donationOrgs, donationAmounts) {
     console.log(donationOrgs, donationAmounts);
     donationsDictionary = {};
     for(var i = 0; i < donationOrgs.length; i++) {
-      donationsDictionary[donationOrgs[i]] = donationAmounts[i];
+      donationsDictionary[donationOrgs[i].replace(', ', '')] = donationAmounts[i];
     }
     return donationsDictionary
 }
