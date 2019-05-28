@@ -32,7 +32,7 @@ admin.initializeApp({
 let db = admin.database();
 // creating a starting path in our database
 let ref = db.ref('/');
-let donationsRef = ref.child('donations');
+let donationsRef = ref.child('Donations');
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -40,27 +40,38 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
 
 
 
-function sendInfoToFirebase(info, donations, annonymous) {
+function sendInfoToFirebase(info, donations, annonymous, token_id, donation_dist) {
     const d = new Date();
     currentMonth = monthNames[d.getMonth()];
     if(annonymous){
-      donationsRef.child(currentMonth).push({
-        Name: "Annonymous",
-        donation: donations.amountTotal
+      donationsRef.child(currentMonth).child(token_id).set({
+        personal_info: "Annonymous",
+        total_donation: donations.amountTotal,
+        donation_distribution: donation_dist,
       })
     } else {
-      donationsRef.child(currentMonth).push({
-        name: info.first_name + ' ' + info.last_name,
+      donationsRef.child(currentMonth).child(token_id).set({
+        personal_info: { name: info.first_name + ' ' + info.last_name,
         email: info.email,
         phone: info.phone,
         street: info.street,
         city: info.city,
         state: info.state,
         postal: info.postal,
-        country: info.country,
-        donation: donations.amountTotal
+        country: info.country },
+        total_donation: donations.amountTotal,
+        donation_distribution: donation_dist
       });
     }
+}
+
+function getAllDonations(donationOrgs, donationAmounts) {
+    console.log(donationOrgs, donationAmounts);
+    donationsDictionary = {};
+    for(var i = 0; i < donationOrgs.length; i++) {
+      donationsDictionary[donationOrgs[i]] = donationAmounts[i];
+    }
+    return donationsDictionary
 }
 
 
@@ -72,14 +83,16 @@ app.get("/", function(req, res) {
 //POST request handler for the charge
 app.post("/charge", async (req, res) => {
   try {
+    let allDonations = getAllDonations(req.body.donations.selectedOrganizations, req.body.donations.amountToOrg)
+    console.log(allDonations)
     let {status} = await stripe.charges.create({
       amount: req.body.donations.amountTotal * 100,
       currency: "usd",
-      description: req.body.id.token.id,
+      description: JSON.stringify(allDonations), //req.body.id.token.id,
       source: req.body.id.token.id
     });
 
-    sendInfoToFirebase(req.body.data, req.body.donations, req.body.anon)
+    sendInfoToFirebase(req.body.data, req.body.donations, req.body.anon, req.body.id.token.id, allDonations);
 
     res.json({status});
   } catch (err) {
