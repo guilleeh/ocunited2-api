@@ -78,7 +78,7 @@ function getAllDonations(donationOrgs, donationAmounts, token_id) {
     for(var i = 0; i < donationOrgs.length; i++) {
       donationsDictionary[donationOrgs[i].replace(', ', '')] = donationAmounts[i];
     }
-    donations["id"] = token_id
+    donationsDictionary["id"] = token_id
     return donationsDictionary
 }
 
