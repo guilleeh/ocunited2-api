@@ -72,12 +72,13 @@ function sendInfoToFirebase(info, donations, annonymous, token_id, donation_dist
     }
 }
 
-function getAllDonations(donationOrgs, donationAmounts) {
+function getAllDonations(donationOrgs, donationAmounts, token_id) {
     console.log(donationOrgs, donationAmounts);
     donationsDictionary = {};
     for(var i = 0; i < donationOrgs.length; i++) {
       donationsDictionary[donationOrgs[i].replace(', ', '')] = donationAmounts[i];
     }
+    donations["id"] = token_id
     return donationsDictionary
 }
 
@@ -90,7 +91,7 @@ app.get("/", function(req, res) {
 //POST request handler for the charge
 app.post("/charge", async (req, res) => {
   try {
-    let allDonations = getAllDonations(req.body.donations.selectedOrganizations, req.body.donations.amountToOrg)
+    let allDonations = getAllDonations(req.body.donations.selectedOrganizations, req.body.donations.amountToOrg, req.body.id.token.id)
     console.log(allDonations)
     let {status} = await stripe.charges.create({
       amount: req.body.donations.amountTotal * 100,
