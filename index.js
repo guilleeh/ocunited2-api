@@ -91,23 +91,26 @@ app.get("/", function(req, res) {
 
 //POST request handler for the charge
 app.post("/charge", async (req, res) => {
+  const d = new Date();
   try {
     let allDonations = getAllDonations(req.body.donations.selectedOrganizations, req.body.donations.amountToOrg, req.body.id.token.id)
+    let dataJSON = JSON.stringify(allDonations);
     console.log(allDonations)
     let {status} = await stripe.charges.create({
       amount: req.body.donations.amountTotal * 100,
       currency: "usd",
-      description: JSON.stringify(allDonations), //req.body.id.token.id,
+      description: dataJSON, //req.body.id.token.id,
       source: req.body.id.token.id
     });
 
     sendInfoToFirebase(req.body.data, req.body.donations, req.body.anon, req.body.id.token.id, allDonations);
 
-    
-    request('https://us-central1-ocunited-db637.cloudfunctions.net/sendMail?dest=' + req.body.data.email, { json: true }, (err, res, body) => {
-      if (err) { return console.log(err); }
-      console.log(body);
-    });
+    if(!req.body.anon) { //ONLY EXECUTE WHEN USER IS NOT ANNONYMOUS 
+      request('https://us-central1-ocunited-db637.cloudfunctions.net/sendMail?dest=' + req.body.data.email + '&id=' + req.body.id.token.id + '&month=' + monthNames[d.getMonth()] + "&data=" + encodeURIComponent(dataJSON), { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        console.log(body);
+      });
+    }
 
     res.json({status});
   } catch (err) {

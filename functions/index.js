@@ -4,6 +4,19 @@ const nodemailer = require('nodemailer');
 const cors = require('cors')({origin: true});
 admin.initializeApp();
 
+function createHtmlTemplate(data, html) {
+    let total = 0
+    for(var key in data) {
+        if (key !== "id") {
+            html += `<p>${key}: $${data[key]}</p>`
+            total += data[key];
+        }
+    }
+    html += `<h2>Total: $${total}</h4>`;
+    return html;
+}
+
+
 /*
 * Using GMAIL to send email
 */
@@ -25,13 +38,19 @@ let transporter = nodemailer.createTransport({
 exports.sendMail = functions.https.onRequest((req, res) => {
     cors(req, res, () => {
         const dest = req.query.dest;
-        console.log(dest)
+        const id = req.query.id;
+        const month = req.query.month;
+        const data = req.query.data;
+        console.log(JSON.parse(data));
+        let html = '<h2>Here is a breakdown of your donation</h2>'
+        var htmlTemplate = createHtmlTemplate(JSON.parse(data), html);
+
 
         const mailOptions =  {
             from: '<inf117group@gmail.com>',
             to: dest,
             subject: "Thank you for donating!",
-            html: `<h2>Your donation is appreciated<h2> `
+            html: htmlTemplate
         };
 
         //returning result
