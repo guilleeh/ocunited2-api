@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const stripe = require("stripe")("sk_test_JTcthxlTgnrPaqHIOkOJeWxX00tNmpflcm");
 const admin = require("firebase-admin");
+const request = require('request');
 
 const app=express().use('*', cors());
 
@@ -101,6 +102,12 @@ app.post("/charge", async (req, res) => {
     });
 
     sendInfoToFirebase(req.body.data, req.body.donations, req.body.anon, req.body.id.token.id, allDonations);
+
+    
+    request('https://us-central1-ocunited-db637.cloudfunctions.net/sendMail?dest=' + req.body.data.email, { json: true }, (err, res, body) => {
+      if (err) { return console.log(err); }
+      console.log(body);
+    });
 
     res.json({status});
   } catch (err) {
