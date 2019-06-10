@@ -5,14 +5,14 @@ const cors = require('cors')({origin: true});
 admin.initializeApp();
 
 function createHtmlTemplate(data, html) {
-    let total = 0
+    let total = 0   
     for(var key in data) {
         if (key !== "id") {
             html += `<p>${key}: $${data[key]}</p>`
             total += data[key];
         }
     }
-    html += `<h2>Total: $${total}</h4>`;
+    html += `<h2>Total: $${parseInt(total)}</h4>`;
     return html;
 }
 
@@ -47,7 +47,7 @@ exports.sendMail = functions.https.onRequest((req, res) => {
 
 
         const mailOptions =  {
-            from: '<inf117group@gmail.com>',
+            from: 'Do not reply <inf117group@gmail.com>',
             to: dest,
             subject: "Thank you for donating!",
             html: htmlTemplate

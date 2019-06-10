@@ -73,6 +73,26 @@ function sendInfoToFirebase(info, donations, annonymous, token_id, donation_dist
     }
 }
 
+function sendRegistrationToFirebase(info, adults, children) {
+  let registrationRef = ref.child("Registrations");
+  const d = new Date();
+  currentMonth = monthNames[d.getMonth()];
+  registrationRef.child(currentMonth).push({
+    personal_info: {
+        name: info.first_name + ' ' + info.last_name,
+        email: info.email,
+        phone: info.phone,
+        street: info.street,
+        city: info.city,
+        state: info.state,
+        postal: info.postal,
+        country: info.country
+    }, adult_tickets: adults,
+    child_tickets: children
+  });
+
+}
+
 function getAllDonations(donationOrgs, donationAmounts, token_id) {
     console.log(donationOrgs, donationAmounts);
     donationsDictionary = {};
@@ -84,18 +104,27 @@ function getAllDonations(donationOrgs, donationAmounts, token_id) {
 }
 
 
+
 app.get("/", function(req, res) {
   //when we get an http get request to the root/homepage
   res.send("Hello World!");
 });
 
+app.post("/register", function(req, res) {
+  let info = req.body.info;
+  let adults = req.body.adults;
+  let children = req.body.children;
+  console.log(info, adults, children);
+  sendRegistrationToFirebase(info, adults, children);
+})
+
 //POST request handler for the charge
 app.post("/charge", async (req, res) => {
   const d = new Date();
   try {
+    console.log(req.body);
     let allDonations = getAllDonations(req.body.donations.selectedOrganizations, req.body.donations.amountToOrg, req.body.id.token.id)
     let dataJSON = JSON.stringify(allDonations);
-    console.log(allDonations)
     let {status} = await stripe.charges.create({
       amount: req.body.donations.amountTotal * 100,
       currency: "usd",
